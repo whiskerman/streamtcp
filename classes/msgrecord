@@ -1,0 +1,11 @@
+package streamtcp
+
+import (
+	"fmt"
+)
+
+type MsgRecord struct {
+	id      string
+	ver     string
+	msgtype int32
+}
