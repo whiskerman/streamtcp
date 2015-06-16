@@ -18,7 +18,7 @@ const (
 )
 
 func startServer() (server *Server) {
-	server = CreateServer()
+	server = CreateServer(nil)
 	log.Printf("Server %p created\n", server)
 	go server.Start(CONNSTR)
 	return
@@ -31,7 +31,7 @@ func startClient() (client *Client) {
 		log.Fatal(err)
 	}
 
-	client = CreateClient(conn)
+	client = CreateClient(conn, nil)
 
 	return
 }
@@ -63,10 +63,10 @@ func verifyAndStopServer(t *testing.T, server *Server, clients Clients, expected
 	for i := 0; i < N; i++ {
 		msg := <-clients[i].incoming
 		tokens <- 0
-		if strings.Contains(msg, expected) {
+		if strings.Contains(string(msg), expected) {
 			t.Logf("%d: %s\n", i, msg)
 		} else {
-			t.Errorf("Message: %s, expected %s\n", msg, expected)
+			t.Errorf("Message: %s, expected %s\n", string(msg), expected)
 		}
 	}
 
@@ -82,7 +82,7 @@ func TestBroadcast(t *testing.T) {
 	N := MAXCLIENTS
 	server, clients := startServerClients(N)
 
-	clients[0].PutOutgoing(EXPECTED + "\n")
+	clients[0].PutOutgoing([]byte(EXPECTED + "\n"))
 
 	verifyAndStopServer(t, server, clients, EXPECTED)
 }
@@ -93,18 +93,18 @@ func TestJoinLeave(t *testing.T) {
 
 	server, clients := startServerClients(N)
 
-	if len(server.clients) != MAXCLIENTS {
-		t.Errorf("Clients: %d, expected %d", len(server.clients), MAXCLIENTS)
+	if len(server.sessions) != MAXCLIENTS {
+		t.Errorf("Clients: %d, expected %d", len(server.sessions), MAXCLIENTS)
 	}
 
 	clients[0].Close()
 	time.Sleep(50 * time.Millisecond)
 
-	if len(server.clients) != MAXCLIENTS {
-		t.Errorf("Clients: %d, expected %d", len(server.clients), MAXCLIENTS)
+	if len(server.sessions) != MAXCLIENTS {
+		t.Errorf("Clients: %d, expected %d", len(server.sessions), MAXCLIENTS)
 	}
 
-	clients[M+1].PutOutgoing(EXPECTED + "\n")
+	clients[M+1].PutOutgoing([]byte(EXPECTED + "\n"))
 
 	for i := 1; i < M; i++ {
 		log.Printf("Close client %p\n", clients[i])
@@ -120,7 +120,7 @@ func TestChangeName(t *testing.T) {
 
 	server, clients := startServerClients(N)
 
-	clients[0].PutOutgoing(":name Tyr\n")
+	clients[0].PutOutgoing([]byte(":name Tyr\n"))
 
 	verifyAndStopServer(t, server, clients, "changed its name to Tyr")
 }

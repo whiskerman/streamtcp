@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	MAXCLIENTS = 1000000
+	MAXCLIENTS = 20000
 )
 
 type CallBackServer func(net.Conn, []byte)
