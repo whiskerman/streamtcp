@@ -2,7 +2,7 @@ package streamtcp
 
 import (
 	"bufio"
-	"errors"
+	//	"errors"
 	"log"
 	"net"
 	"time"
@@ -142,7 +142,7 @@ func (self *Session) Write() {
 				out = data
 			} else {
 
-				out := Packet([]byte(data))
+				out = Packet([]byte(data))
 			}
 
 			if _, err := self.writer.Write(out); err != nil {
