@@ -3,6 +3,7 @@ package streamtcp
 import (
 	"bufio"
 	//	"errors"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -132,19 +133,21 @@ func (self *Session) Write() {
 		timeout := make(chan bool)
 		go func() {
 			time.Sleep(30 * time.Second)
+			fmt.Println("sleep 30")
 			timeout <- true
+			fmt.Println("end sleep 30")
 		}()
 		select {
 
 		case data := <-self.outgoing:
 			var out []byte
-			if len(data) == 1 && string(data) == "P" {
+			if len(data) == 1 && string(data[:1]) == "P" {
 				out = data
 			} else {
 
 				out = Packet([]byte(data))
 			}
-
+			fmt.Println(self.conn, " send:", string(out))
 			if _, err := self.writer.Write(out); err != nil {
 				self.quit()
 				return
@@ -155,8 +158,11 @@ func (self *Session) Write() {
 				return
 			}
 		case <-timeout:
-
-			self.outgoing <- []byte("P")
+			fmt.Println("recv sleep 30")
+			go func() {
+				self.outgoing <- []byte("P")
+			}()
+			fmt.Println("send outgoing P")
 			/*
 				if err := self.WritePing(); err != nil {
 					self.quit()

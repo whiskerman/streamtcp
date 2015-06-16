@@ -91,6 +91,7 @@ func (self *Server) join(conn net.Conn) {
 					}
 				}
 			*/
+			fmt.Println(session.conn, " incoming: ", msg)
 			if self.messageRec != nil {
 				self.messageRec(conn, msg)
 			}
@@ -121,6 +122,7 @@ func (self *Server) broadcast(message []byte) {
 	log.Printf("Broadcasting message: %s\n", message)
 	for _, client := range self.sessions {
 		client.outgoing <- message
+		fmt.Println(client.conn, ":", message)
 	}
 }
 

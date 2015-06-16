@@ -3,6 +3,7 @@ package streamtcp
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 )
@@ -129,7 +130,7 @@ func (self *Client) Write() {
 
 		case data := <-self.outgoing:
 			out := Packet([]byte(data))
-
+			fmt.Println(string(out))
 			if _, err := self.writer.Write(out); err != nil {
 				self.quit()
 				return
