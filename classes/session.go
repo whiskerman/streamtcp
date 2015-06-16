@@ -63,6 +63,7 @@ func (self *Session) quit() {
 	self.quiting <- self.conn
 }
 
+/*
 func (self *Session) WritePing() error {
 	if _, err := self.writer.Write([]byte("P")); err != nil {
 
@@ -75,6 +76,7 @@ func (self *Session) WritePing() error {
 	}
 	return nil
 }
+*/
 
 func (self *Session) Read() {
 	tmpBuffer := make([]byte, 0)
@@ -135,7 +137,13 @@ func (self *Session) Write() {
 		select {
 
 		case data := <-self.outgoing:
-			out := Packet([]byte(data))
+			var out []byte
+			if len(data) == 1 && string(data) == "P" {
+				out = data
+			} else {
+
+				out := Packet([]byte(data))
+			}
 
 			if _, err := self.writer.Write(out); err != nil {
 				self.quit()
@@ -148,10 +156,13 @@ func (self *Session) Write() {
 			}
 		case <-timeout:
 
-			if err := self.WritePing(); err != nil {
-				self.quit()
-				return
-			}
+			self.outgoing <- []byte("P")
+			/*
+				if err := self.WritePing(); err != nil {
+					self.quit()
+					return
+				}
+			*/
 			log.Println(self.conn.RemoteAddr().String(), " send : P ")
 		}
 	}
