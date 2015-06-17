@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	MAXCLIENTS = 20000
+	MAXCLIENTS = 1000000
 )
 
 type CallBackServer func(net.Conn, []byte)
@@ -18,7 +18,7 @@ type Token chan int
 type ClientTable map[net.Conn]*Session
 
 type Server struct {
-	listener   net.Listener
+	listeners  []net.Listener
 	sessions   ClientTable
 	tokens     Token
 	pending    chan net.Conn
@@ -38,14 +38,16 @@ func (self *Server) takeToken() {
 
 func CreateServer(callbackServer CallBackServer) *Server {
 	server := &Server{
-		sessions:   make(ClientTable, MAXCLIENTS),
-		tokens:     make(Token, MAXCLIENTS),
-		pending:    make(chan net.Conn),
-		quiting:    make(chan net.Conn),
-		incoming:   make(Message),
-		outgoing:   make(Message),
+		sessions: make(ClientTable, MAXCLIENTS),
+		tokens:   make(Token, MAXCLIENTS),
+		pending:  make(chan net.Conn, 1024),
+		quiting:  make(chan net.Conn, 1024),
+		incoming: make(Message, 1024000),
+		outgoing: make(Message, 1024000),
+
 		messageRec: callbackServer,
 	}
+	server.listeners = make([]net.Listener, 100)
 	server.listen()
 	return server
 }
@@ -91,7 +93,7 @@ func (self *Server) join(conn net.Conn) {
 					}
 				}
 			*/
-			fmt.Println(session.conn, " incoming: ", msg)
+			//fmt.Println(session.conn, " incoming: ", msg)
 			if self.messageRec != nil {
 				self.messageRec(conn, msg)
 			}
@@ -119,40 +121,59 @@ func (self *Server) leave(conn net.Conn) {
 }
 
 func (self *Server) broadcast(message []byte) {
-	log.Printf("Broadcasting message: %s\n", message)
+	//log.Printf("Broadcasting message: %s\n", message)
 	for _, client := range self.sessions {
-		client.outgoing <- message
-		fmt.Println(client.conn, ":", message)
+		go func(se *Session) {
+			se.outgoing <- message
+		}(client)
+		//fmt.Println(client.conn, ":", message)
 	}
 }
 
 func (self *Server) Start(connString string) {
-	self.listener, _ = net.Listen("tcp", connString)
+	exit := make(chan bool)
+	for x := 0; x < 1; x++ {
+		func(n int, constr string) {
+			var err error
+			self.listeners[n], err = net.Listen("tcp", constr)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 
-	log.Printf("Server %p starts%v\n", self, self)
+			log.Printf("Server %p starts%v\n  x is %d", self.listeners[n], self.listeners[n], n)
 
-	// filling the tokens
-	for i := 0; i < MAXCLIENTS; i++ {
-		self.generateToken()
+			// filling the tokens
+			for i := 0; i < MAXCLIENTS; i++ {
+				self.generateToken()
+			}
+
+			for {
+				conn, err := self.listeners[n].Accept()
+
+				if err != nil {
+					log.Println(err)
+					return
+				}
+
+				log.Printf("A new connection %v kicks\n", conn)
+
+				self.takeToken()
+				self.pending <- conn
+			}
+			exit <- true
+		}(x, connString)
 	}
 
-	for {
-		conn, err := self.listener.Accept()
+	<-exit
 
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		log.Printf("A new connection %v kicks\n", conn)
-
-		self.takeToken()
-		self.pending <- conn
-	}
 }
 
 // FIXME: need to figure out if this is the correct approach to gracefully
 // terminate a server.
 func (self *Server) Stop() {
-	self.listener.Close()
+	for _, lt := range self.listeners {
+		lt.Close()
+	}
+
 }

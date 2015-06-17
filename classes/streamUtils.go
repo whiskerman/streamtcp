@@ -26,7 +26,7 @@ const (
 )
 
 var (
-	num = make(chan int, 10)
+	num = make(chan int, 100)
 )
 
 func init() {

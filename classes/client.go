@@ -3,7 +3,7 @@ package streamtcp
 import (
 	"bufio"
 	"errors"
-	"fmt"
+	//"fmt"
 	"log"
 	"net"
 )
@@ -25,6 +25,10 @@ func (self *Client) GetName() string {
 	return self.name
 }
 
+func (self *Client) GetConn() net.Conn {
+	return self.conn
+}
+
 func (self *Client) SetName(name string) {
 	self.name = name
 }
@@ -43,8 +47,8 @@ func CreateClient(conn net.Conn, callback CallBackCClient) *Client {
 
 	Client := &Client{
 		conn:       conn,
-		incoming:   make(Message),
-		outgoing:   make(Message),
+		incoming:   make(Message, 1024),
+		outgoing:   make(Message, 1024),
 		quiting:    make(chan net.Conn),
 		reader:     reader,
 		writer:     writer,
@@ -105,8 +109,9 @@ func (self *Client) Read() {
 					return
 				}
 			*/
-			log.Println(self.conn.RemoteAddr().String(), " recv : P ")
-		} else if n > 0 {
+			//log.Println(self.conn.RemoteAddr().String(), " recv : P ")
+		}
+		if n > 0 {
 			//fmt.Println("n is ========================================", n)
 			tmpBuffer = Unpack(append(tmpBuffer, buffer[:n]...), self.incoming)
 
@@ -126,21 +131,20 @@ func (self *Client) Read() {
 
 func (self *Client) Write() {
 	for {
-		select {
-
-		case data := <-self.outgoing:
-			out := Packet([]byte(data))
-			fmt.Println(string(out))
-			if _, err := self.writer.Write(out); err != nil {
-				self.quit()
-				return
-			}
-			if err := self.writer.Flush(); err != nil {
-				log.Printf("Write error: %s\n", err)
-				self.quit()
-				return
-			}
+		datas, _ := <-self.outgoing
+		out := Packet([]byte(datas))
+		//fmt.Println(string(out))
+		if _, err := self.writer.Write(out); err != nil {
+			log.Printf("Write error: %s\n", err)
+			self.quit()
+			return
 		}
+		if err := self.writer.Flush(); err != nil {
+			log.Printf("Write error: %s\n", err)
+			self.quit()
+			return
+		}
+
 	}
 
 }

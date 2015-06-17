@@ -3,7 +3,7 @@ package streamtcp
 import (
 	"bufio"
 	//	"errors"
-	"fmt"
+	//	"fmt"
 	"log"
 	"net"
 	"time"
@@ -44,8 +44,8 @@ func CreateSession(conn net.Conn, callback CallBackClient) *Session {
 
 	session := &Session{
 		conn:       conn,
-		incoming:   make(Message),
-		outgoing:   make(Message),
+		incoming:   make(Message, 1024),
+		outgoing:   make(Message, 1024),
 		quiting:    make(chan net.Conn),
 		reader:     reader,
 		writer:     writer,
@@ -92,7 +92,7 @@ func (self *Session) Read() {
 					break
 				}
 			*/
-			log.Println(self.conn.RemoteAddr().String(), " connection error: ", err)
+			log.Println(" connection error: ", err) //self.conn.RemoteAddr().String(),
 			self.quit()
 			return
 		}
@@ -108,8 +108,9 @@ func (self *Session) Read() {
 					return
 				}
 			*/
-			log.Println(self.conn.RemoteAddr().String(), " recv : P ")
-		} else if n > 0 {
+			//log.Println(self.conn.RemoteAddr().String(), " recv : P ")
+		}
+		if n > 0 {
 			//fmt.Println("n is ========================================", n)
 			tmpBuffer = Unpack(append(tmpBuffer, buffer[:n]...), self.incoming)
 
@@ -126,17 +127,23 @@ func (self *Session) Read() {
 	}
 
 }
-
+func (self *Session) WritePing() {
+	self.outgoing <- []byte("P")
+}
 func (self *Session) Write() {
 
 	for {
 		timeout := make(chan bool)
+		defer func() {
+			close(timeout)
+		}()
 		go func() {
 			time.Sleep(30 * time.Second)
-			fmt.Println("sleep 30")
+			//fmt.Println("sleep 30")
 			timeout <- true
-			fmt.Println("end sleep 30")
+			//fmt.Println("end sleep 30")
 		}()
+
 		select {
 
 		case data := <-self.outgoing:
@@ -147,8 +154,9 @@ func (self *Session) Write() {
 
 				out = Packet([]byte(data))
 			}
-			fmt.Println(self.conn, " send:", string(out))
+			//fmt.Println(self.conn, " send:", string(out))
 			if _, err := self.writer.Write(out); err != nil {
+				log.Printf("Write error: %s\n", err)
 				self.quit()
 				return
 			}
@@ -158,18 +166,16 @@ func (self *Session) Write() {
 				return
 			}
 		case <-timeout:
-			fmt.Println("recv sleep 30")
-			go func() {
-				self.outgoing <- []byte("P")
-			}()
-			fmt.Println("send outgoing P")
+			//fmt.Println("recv sleep 30")
+			go self.WritePing()
+			//fmt.Println("send outgoing P")
 			/*
 				if err := self.WritePing(); err != nil {
 					self.quit()
 					return
 				}
 			*/
-			log.Println(self.conn.RemoteAddr().String(), " send : P ")
+			//log.Println(self.conn.RemoteAddr().String(), " send : P ")
 		}
 	}
 

@@ -1,0 +1,247 @@
+runtime/cgo: pthread_create failed: Resource temporarily unavailable
+SIGABRT: abort
+PC=0x7fff8f4f0286
+
+goroutine 0 [idle]:
+
+goroutine 1 [IO wait]:
+net.(*pollDesc).Wait(0xc2080100d0, 0x72, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:84 +0x47
+net.(*pollDesc).WaitRead(0xc2080100d0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:89 +0x43
+net.(*netFD).accept(0xc208010070, 0x0, 0x2b9938, 0xc22f607e78)
+	/Users/zhaohai/go/src/net/fd_unix.go:419 +0x40b
+net.(*TCPListener).AcceptTCP(0xc208044028, 0x1044a0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/tcpsock_posix.go:234 +0x4e
+net.(*TCPListener).Accept(0xc208044028, 0x0, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/tcpsock_posix.go:244 +0x4c
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).Start(0xc2080460a0, 0x7fff5fbff8a3, 0xc)
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:140 +0x215
+main.main()
+	/Users/zhaohai/goworks/src/streamtcp/cserver.go:17 +0x224
+
+goroutine 5 [chan send]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·006()
+	/Users/zhaohai/goworks/src/streamtcp/classes/streamUtils.go:35 +0x4c
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.init·1
+	/Users/zhaohai/goworks/src/streamtcp/classes/streamUtils.go:37 +0x25
+
+goroutine 6 [runnable]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).broadcast(0xc2080460a0, 0xc2678da600, 0x2c, 0x30)
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:124 +0x1de
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·001()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:58 +0x15c
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:65 +0x8c
+
+goroutine 7 [IO wait]:
+net.(*pollDesc).Wait(0xc208010140, 0x72, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:84 +0x47
+net.(*pollDesc).WaitRead(0xc208010140, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:89 +0x43
+net.(*netFD).Read(0xc2080100e0, 0xc20800f000, 0x1000, 0x1000, 0x0, 0x2b9938, 0xc20802a448)
+	/Users/zhaohai/go/src/net/fd_unix.go:242 +0x40f
+net.(*conn).Read(0xc208044030, 0xc20800f000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/net.go:121 +0xdc
+bufio.(*Reader).fill(0xc208052240)
+	/Users/zhaohai/go/src/bufio/bufio.go:97 +0x1ce
+bufio.(*Reader).Read(0xc208052240, 0xc20800c400, 0x400, 0x400, 0x400, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:174 +0x26c
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Read(0xc208046230)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:86 +0xf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:59 +0x32
+
+goroutine 8 [select]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write(0xc208046230)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:140 +0xaf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:60 +0x4c
+
+goroutine 9 [chan send]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·004()
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:137 +0x130
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:139 +0xe9
+
+goroutine 11 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·002()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:78 +0x92
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:101 +0x34e
+
+goroutine 12 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·003()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:105 +0x7a
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:109 +0x3c4
+
+goroutine 13 [IO wait]:
+net.(*pollDesc).Wait(0xc2080101b0, 0x72, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:84 +0x47
+net.(*pollDesc).WaitRead(0xc2080101b0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:89 +0x43
+net.(*netFD).Read(0xc208010150, 0xc20bc1b000, 0x1000, 0x1000, 0x0, 0x2b9938, 0xc20802a508)
+	/Users/zhaohai/go/src/net/fd_unix.go:242 +0x40f
+net.(*conn).Read(0xc208044060, 0xc20bc1b000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/net.go:121 +0xdc
+bufio.(*Reader).fill(0xc208052420)
+	/Users/zhaohai/go/src/bufio/bufio.go:97 +0x1ce
+bufio.(*Reader).Read(0xc208052420, 0xc20800c800, 0x400, 0x400, 0x400, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:174 +0x26c
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Read(0xc208046280)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:86 +0xf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:59 +0x32
+
+goroutine 14 [select]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write(0xc208046280)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:140 +0xaf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:60 +0x4c
+
+goroutine 15 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·002()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:78 +0x92
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:101 +0x34e
+
+goroutine 16 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·003()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:105 +0x7a
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:109 +0x3c4
+
+goroutine 17 [chan send]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·004()
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:137 +0x130
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:139 +0xe9
+
+goroutine 18 [IO wait]:
+net.(*pollDesc).Wait(0xc208010220, 0x72, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:84 +0x47
+net.(*pollDesc).WaitRead(0xc208010220, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:89 +0x43
+net.(*netFD).Read(0xc2080101c0, 0xc20bc25000, 0x1000, 0x1000, 0x0, 0x2b9938, 0xc20802a5a8)
+	/Users/zhaohai/go/src/net/fd_unix.go:242 +0x40f
+net.(*conn).Read(0xc208044088, 0xc20bc25000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/net.go:121 +0xdc
+bufio.(*Reader).fill(0xc208052600)
+	/Users/zhaohai/go/src/bufio/bufio.go:97 +0x1ce
+bufio.(*Reader).Read(0xc208052600, 0xc20800cc00, 0x400, 0x400, 0x400, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:174 +0x26c
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Read(0xc2080462d0)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:86 +0xf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:59 +0x32
+
+goroutine 19 [syscall]:
+syscall.Syscall(0x4, 0x7, 0xc20bc2e000, 0x3d, 0x28a2e01, 0xa, 0x80000000000)
+	/Users/zhaohai/go/src/syscall/asm_darwin_amd64.s:20 +0x5
+syscall.write(0x7, 0xc20bc2e000, 0x3d, 0x1000, 0x77, 0x0, 0x0)
+	/Users/zhaohai/go/src/syscall/zsyscall_darwin_amd64.go:1358 +0x6e
+syscall.Write(0x7, 0xc20bc2e000, 0x3d, 0x1000, 0x1, 0x0, 0x0)
+	/Users/zhaohai/go/src/syscall/syscall_unix.go:152 +0x58
+net.(*netFD).Write(0xc2080101c0, 0xc20bc2e000, 0x3d, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_unix.go:327 +0x34c
+net.(*conn).Write(0xc208044088, 0xc20bc2e000, 0x3d, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/net.go:129 +0xdc
+bufio.(*Writer).flush(0xc208034840, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:530 +0xe0
+bufio.(*Writer).Flush(0xc208034840, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:519 +0x3a
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write(0xc2080462d0)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:155 +0x527
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:60 +0x4c
+
+goroutine 20 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·002()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:78 +0x92
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:101 +0x34e
+
+goroutine 21 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·003()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:105 +0x7a
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:109 +0x3c4
+
+goroutine 22 [chan send]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·004()
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:137 +0x130
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:139 +0xe9
+
+goroutine 23 [IO wait]:
+net.(*pollDesc).Wait(0xc208010290, 0x72, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:84 +0x47
+net.(*pollDesc).WaitRead(0xc208010290, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:89 +0x43
+net.(*netFD).Read(0xc208010230, 0xc20bc2f000, 0x1000, 0x1000, 0x0, 0x2b9938, 0xc20802a638)
+	/Users/zhaohai/go/src/net/fd_unix.go:242 +0x40f
+net.(*conn).Read(0xc2080440b0, 0xc20bc2f000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/net.go:121 +0xdc
+bufio.(*Reader).fill(0xc2080527e0)
+	/Users/zhaohai/go/src/bufio/bufio.go:97 +0x1ce
+bufio.(*Reader).Read(0xc2080527e0, 0xc20800d000, 0x400, 0x400, 0x400, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:174 +0x26c
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Read(0xc208046320)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:86 +0xf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:59 +0x32
+
+goroutine 24 [select]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write(0xc208046320)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:140 +0xaf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:60 +0x4c
+
+goroutine 25 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·002()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:78 +0x92
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:101 +0x34e
+
+goroutine 26 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·003()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:105 +0x7a
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:109 +0x3c4
+
+goroutine 27 [chan send]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·004()
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:137 +0x130
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:139 +0xe9
+
+goroutine 28 [IO wait]:
+net.(*pollDesc).Wait(0xc208010300, 0x72, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:84 +0x47
+net.(*pollDesc).WaitRead(0xc208010300, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/fd_poll_runtime.go:89 +0x43
+net.(*netFD).Read(0xc2080102a0, 0xc20bc33000, 0x1000, 0x1000, 0x0, 0x2b9938, 0xc20802a6c8)
+	/Users/zhaohai/go/src/net/fd_unix.go:242 +0x40f
+net.(*conn).Read(0xc2080440d8, 0xc20bc33000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+	/Users/zhaohai/go/src/net/net.go:121 +0xdc
+bufio.(*Reader).fill(0xc2080529c0)
+	/Users/zhaohai/go/src/bufio/bufio.go:97 +0x1ce
+bufio.(*Reader).Read(0xc2080529c0, 0xc20800d400, 0x400, 0x400, 0x400, 0x0, 0x0)
+	/Users/zhaohai/go/src/bufio/bufio.go:174 +0x26c
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Read(0xc208046370)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:86 +0xf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:59 +0x32
+
+goroutine 29 [runnable]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Write(0xc208046370)
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:140 +0xaf3
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Session).Listen
+	/Users/zhaohai/goworks/src/streamtcp/classes/session.go:60 +0x4c
+
+goroutine 30 [chan receive]:
+_/Users/zhaohai/goworks/src/streamtcp/classes.func·002()
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:78 +0x92
+created by _/Users/zhaohai/goworks/src/streamtcp/classes.(*Server).join
+	/Users/zhaohai/goworks/src/streamtcp/classes/server.go:101 +0x34e

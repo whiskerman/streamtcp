@@ -26,7 +26,7 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 
 	client := CreateClient(conn, nil)
-
+	fmt.Printf("%v", conn.LocalAddr())
 	go func() {
 		for {
 			out.WriteString(string(client.GetIncoming()) + "\n")
