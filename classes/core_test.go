@@ -79,7 +79,7 @@ func verifyAndStopServer(t *testing.T, server *Server, clients Clients, expected
 }
 
 func TestBroadcast(t *testing.T) {
-	N := MAXCLIENTS
+	N := 40000
 	server, clients := startServerClients(N)
 
 	clients[0].PutOutgoing([]byte(EXPECTED + "\n"))

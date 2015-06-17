@@ -7,7 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
-	//"time"
+	"time"
 )
 
 type (
@@ -47,11 +47,14 @@ func main() {
 		os.Exit(-1)
 	}
 	exit := make(chan bool)
-	cc := startClients(20000)
+	cc := startClients(40000)
 
 	for x, ss := range cc {
-		go func(ii int, sc *Client) {
-			sc.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", ii)))
+		func(ii int, sc *Client) {
+			if ii%100 == 0 {
+				sc.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", ii)))
+				time.Sleep(time.Second * 1)
+			}
 			if x == 21001 {
 				exit <- true
 			}
