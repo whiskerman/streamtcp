@@ -124,7 +124,9 @@ func (self *Server) broadcast(message []byte) {
 	//log.Printf("Broadcasting message: %s\n", message)
 	for _, client := range self.sessions {
 		go func(se *Session) {
-			se.outgoing <- message
+			if !se.closing {
+				se.outgoing <- message
+			}
 		}(client)
 		//fmt.Println(client.conn, ":", message)
 	}

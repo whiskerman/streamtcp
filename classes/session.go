@@ -19,6 +19,7 @@ type Session struct {
 	writer     *bufio.Writer
 	quiting    chan net.Conn
 	name       string
+	closing    bool
 	messageRec CallBackClient
 }
 
@@ -43,14 +44,16 @@ func CreateSession(conn net.Conn, callback CallBackClient) *Session {
 	writer := bufio.NewWriter(conn)
 
 	session := &Session{
-		conn:       conn,
-		incoming:   make(Message, 1024),
-		outgoing:   make(Message, 1024),
-		quiting:    make(chan net.Conn),
-		reader:     reader,
-		writer:     writer,
+		conn:     conn,
+		incoming: make(Message, 1024),
+		outgoing: make(Message, 1024),
+		quiting:  make(chan net.Conn),
+		reader:   reader,
+		writer:   writer,
+
 		messageRec: callback,
 	}
+	session.closing = false
 	session.Listen()
 	return session
 }
@@ -80,9 +83,15 @@ func (self *Session) WritePing() error {
 */
 
 func (self *Session) Read() {
+	if self.closing {
+		return
+	}
 	tmpBuffer := make([]byte, 0)
 	buffer := make([]byte, 1024)
 	for {
+		if self.closing {
+			return
+		}
 		n, err := self.reader.Read(buffer)
 		//self.reader.Read()
 		if err != nil {
@@ -92,6 +101,7 @@ func (self *Session) Read() {
 					break
 				}
 			*/
+			self.closing = true
 			log.Println(" connection error: ", err) //self.conn.RemoteAddr().String(),
 			self.quit()
 			return
@@ -133,20 +143,34 @@ func (self *Session) WritePing() {
 func (self *Session) Write() {
 
 	for {
-		timeout := make(chan bool)
-		defer func() {
-			close(timeout)
-		}()
-		go func() {
-			time.Sleep(30 * time.Second)
-			//fmt.Println("sleep 30")
-			timeout <- true
-			//fmt.Println("end sleep 30")
-		}()
-
+		if self.closing {
+			return
+		}
+		/*
+			timeout := make(chan bool)
+			defer func() {
+				close(timeout)
+				<-timeout
+			}()
+			go func() {
+				if self.closing {
+					return
+				}
+				time.Sleep(30 * time.Second)
+				//fmt.Println("sleep 30")
+				if self.closing {
+					return
+				}
+				timeout <- true
+				//fmt.Println("end sleep 30")
+			}()
+		*/
 		select {
 
 		case data := <-self.outgoing:
+			if self.closing {
+				return
+			}
 			var out []byte
 			if len(data) == 1 && string(data[:1]) == "P" {
 				out = data
@@ -157,15 +181,21 @@ func (self *Session) Write() {
 			//fmt.Println(self.conn, " send:", string(out))
 			if _, err := self.writer.Write(out); err != nil {
 				log.Printf("Write error: %s\n", err)
+				self.closing = true
 				self.quit()
 				return
 			}
 			if err := self.writer.Flush(); err != nil {
 				log.Printf("Write error: %s\n", err)
+				self.closing = true
 				self.quit()
 				return
 			}
-		case <-timeout:
+		//case <-timeout:
+		case <-time.After(time.Second * 30):
+			if self.closing {
+				return
+			}
 			//fmt.Println("recv sleep 30")
 			go self.WritePing()
 			//fmt.Println("send outgoing P")

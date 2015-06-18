@@ -7,7 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"time"
+	//"time"
 )
 
 type (
@@ -50,11 +50,11 @@ func main() {
 	cc := startClients(40000)
 
 	for x, ss := range cc {
-		func(ii int, sc *Client) {
-			if ii%100 == 0 {
-				sc.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", ii)))
-				time.Sleep(time.Second * 1)
-			}
+		go func(ii int, sc *Client) {
+			//if ii%100 == 0 {
+			sc.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", ii)))
+			//time.Sleep(time.Second * 1)
+			//}
 			if x == 21001 {
 				exit <- true
 			}
