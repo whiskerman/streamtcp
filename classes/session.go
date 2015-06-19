@@ -167,6 +167,21 @@ func (self *Session) Write() {
 		*/
 		select {
 
+		case <-time.After(time.Second * 30):
+			if self.closing {
+				return
+			}
+			//fmt.Println("recv sleep 30")
+			go self.WritePing()
+			//fmt.Println("send outgoing P")
+			/*
+				if err := self.WritePing(); err != nil {
+					self.quit()
+					return
+				}
+			*/
+			//log.Println(self.conn.RemoteAddr().String(), " send : P ")
+
 		case data := <-self.outgoing:
 			if self.closing {
 				return
@@ -191,22 +206,9 @@ func (self *Session) Write() {
 				self.quit()
 				return
 			}
-		//case <-timeout:
-		case <-time.After(time.Second * 30):
-			if self.closing {
-				return
-			}
-			//fmt.Println("recv sleep 30")
-			go self.WritePing()
-			//fmt.Println("send outgoing P")
-			/*
-				if err := self.WritePing(); err != nil {
-					self.quit()
-					return
-				}
-			*/
-			//log.Println(self.conn.RemoteAddr().String(), " send : P ")
 		}
+		//case <-timeout:
+
 	}
 
 }
