@@ -171,6 +171,7 @@ func (self *Session) Write() {
 			if self.closing {
 				return
 			}
+			fmt.Println("my time out")
 			//fmt.Println("recv sleep 30")
 			go self.WritePing()
 			//fmt.Println("send outgoing P")
