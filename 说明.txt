@@ -1,0 +1,26 @@
+说明
+
+//启动Server
+go run cserver.go :9900
+
+
+//启动 并发测试
+
+go run cclientbench.go :9900
+
+
+// 生成cpu profile
+
+go test -cpuprofile=cprof ./classes
+
+//生成内存使用情况 profile
+
+go test -memprofile=mprof ./classes
+
+//生成阻塞情况 profile
+
+go test -blockprofile=bprof ./classes
+
+
+//分析profile
+go tool pprof classes.test cprof   //   mprof   //  bprof
