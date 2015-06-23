@@ -3,7 +3,7 @@ package streamtcp
 import (
 	"bufio"
 	//	"errors"
-	//	"fmt"
+	"fmt"
 	"log"
 	"net"
 	"time"
