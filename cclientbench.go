@@ -28,8 +28,8 @@ func startClient() (client *Client) {
 
 func readclient(client *Client) {
 	for {
-		data := client.GetIncoming()
-		fmt.Println(client.GetConn().RemoteAddr().String(), ":", string(data))
+		client.GetIncoming()
+		//fmt.Println(client.GetConn().RemoteAddr().String(), ":", string(data))
 	}
 }
 
@@ -48,18 +48,19 @@ func main() {
 	}
 	exit := make(chan bool)
 	cc := startClients(40000)
+	go func() {
+		for x, ss := range cc {
 
-	for x, ss := range cc {
-		go func(ii int, sc *Client) {
 			//if ii%100 == 0 {
-			sc.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", ii)))
+			ss.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", x)))
 			//time.Sleep(time.Second * 1)
 			//}
-			if x == 21001 {
+			if x == 210010 {
 				exit <- true
 			}
-		}(x, ss)
-	}
+
+		}
+	}()
 	/*
 		mapc := make(map[int]*Client, 32000)
 		for i := 0; i < 32000; i++ {
