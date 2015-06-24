@@ -3,7 +3,7 @@ package streamtcp
 import (
 	"bufio"
 	//	"errors"
-	//"fmt"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -150,16 +150,18 @@ func (self *Session) Write() {
 		/*
 			timeout := make(chan bool)
 			defer func() {
-				close(timeout)
-				<-timeout
+				//close(timeout)
+				//<-timeout
 			}()
 			go func() {
 				if self.closing {
+					close(timeout)
 					return
 				}
 				time.Sleep(30 * time.Second)
 				//fmt.Println("sleep 30")
 				if self.closing {
+					close(timeout)
 					return
 				}
 				timeout <- true
@@ -172,6 +174,7 @@ func (self *Session) Write() {
 			if self.closing {
 				return
 			}
+			//close(timeout)
 			//fmt.Println("my time out")
 			//fmt.Println("recv sleep 30")
 			go self.WritePing()
@@ -191,6 +194,7 @@ func (self *Session) Write() {
 			var out []byte
 			if len(data) == 1 && string(data[:1]) == "P" {
 				out = data
+				fmt.Println("my time out")
 			} else {
 
 				out = Packet([]byte(data))

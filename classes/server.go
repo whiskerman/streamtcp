@@ -61,15 +61,15 @@ func (self *Server) listen() {
 			case message := <-self.incoming:
 				//go func(msg []byte) {
 				self.broadcast(message)
-			//	}(message)
+				//}(message)
 			case conn := <-self.pending:
-				//go func(con net.Conn) {
-				self.join(conn)
-				//}(con)
+				go func(con net.Conn) {
+					self.join(con)
+				}(conn)
 			case conn := <-self.quiting:
-				//go func(con net.Conn) {
-				self.leave(conn)
-				//}(conn)
+				go func(con net.Conn) {
+					self.leave(con)
+				}(conn)
 			}
 		}
 	}()
@@ -84,7 +84,10 @@ func (self *Server) join(conn net.Conn) {
 	log.Printf("Auto assigned name for conn %p: %s\n", conn, name)
 	go func() {
 		for {
-			msg := <-session.incoming
+			msg, ok := <-session.incoming
+			if !ok {
+				break
+			}
 			/*
 				log.Printf("Got message: %s from client %s\n", msg, session.GetName())
 
@@ -111,7 +114,10 @@ func (self *Server) join(conn net.Conn) {
 
 	go func() {
 		for {
-			conn := <-session.quiting
+			conn, ok := <-session.quiting
+			if !ok {
+				break
+			}
 			log.Printf("Client %s is quiting\n", session.GetName())
 			self.quiting <- conn
 		}
@@ -119,14 +125,21 @@ func (self *Server) join(conn net.Conn) {
 }
 
 func (self *Server) leave(conn net.Conn) {
-	self.locker.Lock()
-	defer self.locker.Unlock()
+
 	if conn != nil {
 		//close(self.sessions[conn].incoming)
 		//close(self.sessions[conn].outgoing)
 		conn.Close()
-
+		self.locker.Lock()
+		client := self.sessions[conn]
+		if client {
+			close(client.incoming)
+			close(client.outgoing)
+			close(client.quiting)
+		}
 		delete(self.sessions, conn)
+
+		self.locker.Unlock()
 
 	}
 
