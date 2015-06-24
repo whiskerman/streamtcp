@@ -28,8 +28,8 @@ func startClient() (client *Client) {
 
 func readclient(client *Client) {
 	for {
-		client.GetIncoming()
-		//fmt.Println(client.GetConn().RemoteAddr().String(), ":", string(data))
+		data := client.GetIncoming()
+		fmt.Println(client.GetConn().RemoteAddr().String(), ":", string(data))
 	}
 }
 

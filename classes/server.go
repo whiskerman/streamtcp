@@ -136,36 +136,38 @@ func (self *Server) broadcast(message []byte) {
 
 func (self *Server) Start(connString string) {
 
-	func(n int, constr string) {
-		var err error
-		self.listener, err = net.Listen("tcp", constr)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+	var err error
+	self.listener, err = net.Listen("tcp", connString)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-		log.Printf("Server %p starts%v\n  x is %d", self, self, n)
+	log.Printf("Server %p starts%v\n  x is %d", self, self, 1)
+	exit := make(chan bool)
+	// filling the tokens
+	for i := 0; i < MAXCLIENTS; i++ {
+		self.generateToken()
+	}
+	for j := 0; j < 10; j++ {
 
-		// filling the tokens
-		for i := 0; i < MAXCLIENTS; i++ {
-			self.generateToken()
-		}
+		go func() {
+			for {
+				conn, err := self.listener.Accept()
 
-		for {
-			conn, err := self.listener.Accept()
+				if err != nil {
+					log.Println(err)
+					return
+				}
 
-			if err != nil {
-				log.Println(err)
-				return
+				log.Printf("A new connection %v kicks\n", conn)
+
+				self.takeToken()
+				self.pending <- conn
 			}
-
-			log.Printf("A new connection %v kicks\n", conn)
-
-			self.takeToken()
-			self.pending <- conn
-		}
-
-	}(1, connString)
+		}()
+	}
+	<-exit
 
 }
 

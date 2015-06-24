@@ -15,10 +15,11 @@ func main() {
 		os.Exit(-1)
 	}
 	go func() {
-		log.Println(http.ListenAndServe("192.168.1.5:6060", nil))
+		log.Println(http.ListenAndServe("192.168.1.107:6060", nil))
 
 	}()
 	server := CreateServer(nil)
+
 	fmt.Printf("Running on %s\n", os.Args[1])
 	server.Start(os.Args[1])
 
