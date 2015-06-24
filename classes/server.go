@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sync"
 	//"strings"
 )
 
@@ -18,6 +19,7 @@ type Token chan int
 type ClientTable map[net.Conn]*Session
 
 type Server struct {
+	locker     *sync.RWMutex
 	listener   net.Listener
 	sessions   ClientTable
 	tokens     Token
@@ -38,13 +40,13 @@ func (self *Server) takeToken() {
 
 func CreateServer(callbackServer CallBackServer) *Server {
 	server := &Server{
-		sessions: make(ClientTable, MAXCLIENTS),
-		tokens:   make(Token, MAXCLIENTS),
-		pending:  make(chan net.Conn, 1024),
-		quiting:  make(chan net.Conn, 1024),
-		incoming: make(Message, 10240),
-		outgoing: make(Message, 10240),
-
+		sessions:   make(ClientTable, MAXCLIENTS),
+		tokens:     make(Token, MAXCLIENTS),
+		pending:    make(chan net.Conn, 1024000),
+		quiting:    make(chan net.Conn, 1024000),
+		incoming:   make(Message, 1024000),
+		outgoing:   make(Message, 1024000),
+		locker:     new(sync.RWMutex),
 		messageRec: callbackServer,
 	}
 	//server.listeners = make([]net.Listener, 100)
@@ -57,11 +59,17 @@ func (self *Server) listen() {
 		for {
 			select {
 			case message := <-self.incoming:
+				//go func(msg []byte) {
 				self.broadcast(message)
+			//	}(message)
 			case conn := <-self.pending:
+				//go func(con net.Conn) {
 				self.join(conn)
+				//}(con)
 			case conn := <-self.quiting:
+				//go func(con net.Conn) {
 				self.leave(conn)
+				//}(conn)
 			}
 		}
 	}()
@@ -74,7 +82,6 @@ func (self *Server) join(conn net.Conn) {
 	self.sessions[conn] = session
 
 	log.Printf("Auto assigned name for conn %p: %s\n", conn, name)
-
 	go func() {
 		for {
 			msg := <-session.incoming
@@ -112,9 +119,15 @@ func (self *Server) join(conn net.Conn) {
 }
 
 func (self *Server) leave(conn net.Conn) {
+	self.locker.Lock()
+	defer self.locker.Unlock()
 	if conn != nil {
+		//close(self.sessions[conn].incoming)
+		//close(self.sessions[conn].outgoing)
 		conn.Close()
+
 		delete(self.sessions, conn)
+
 	}
 
 	self.generateToken()
@@ -122,16 +135,15 @@ func (self *Server) leave(conn net.Conn) {
 
 func (self *Server) broadcast(message []byte) {
 	//log.Printf("Broadcasting message: %s\n", message)
-	go func() {
-		for _, client := range self.sessions {
-			func(se *Session) {
-				if !se.closing {
-					se.outgoing <- message
-				}
-			}(client)
-			//fmt.Println(client.conn, ":", message)
+	//go func() {
+	for _, client := range self.sessions {
+		if !client.closing {
+			client.outgoing <- message
 		}
-	}()
+
+		//fmt.Println(client.conn, ":", message)
+	}
+	//}()
 }
 
 func (self *Server) Start(connString string) {
@@ -144,30 +156,30 @@ func (self *Server) Start(connString string) {
 	}
 
 	log.Printf("Server %p starts%v\n  x is %d", self, self, 1)
-	exit := make(chan bool)
+	//exit := make(chan bool)
 	// filling the tokens
 	for i := 0; i < MAXCLIENTS; i++ {
 		self.generateToken()
 	}
-	for j := 0; j < 10; j++ {
+	//for j := 0; j < 10; j++ {
 
-		go func() {
-			for {
-				conn, err := self.listener.Accept()
+	func(m int) {
+		for {
+			conn, err := self.listener.Accept()
 
-				if err != nil {
-					log.Println(err)
-					return
-				}
-
-				log.Printf("A new connection %v kicks\n", conn)
-
-				self.takeToken()
-				self.pending <- conn
+			if err != nil {
+				log.Println(err)
+				return
 			}
-		}()
-	}
-	<-exit
+
+			log.Printf("A new connection %v kicks\n", conn)
+
+			self.takeToken()
+			self.pending <- conn
+		}
+	}(1)
+	//}
+	//<-exit
 
 }
 

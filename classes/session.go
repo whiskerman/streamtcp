@@ -65,6 +65,7 @@ func (self *Session) Listen() {
 
 func (self *Session) quit() {
 	self.quiting <- self.conn
+
 }
 
 /*

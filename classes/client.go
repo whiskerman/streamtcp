@@ -47,8 +47,8 @@ func CreateClient(conn net.Conn, callback CallBackCClient) *Client {
 
 	Client := &Client{
 		conn:       conn,
-		incoming:   make(Message, 1024),
-		outgoing:   make(Message, 1024),
+		incoming:   make(Message, 102400),
+		outgoing:   make(Message, 102400),
 		quiting:    make(chan net.Conn),
 		reader:     reader,
 		writer:     writer,

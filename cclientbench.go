@@ -48,19 +48,23 @@ func main() {
 	}
 	exit := make(chan bool)
 	cc := startClients(40000)
-	go func() {
-		for x, ss := range cc {
 
-			//if ii%100 == 0 {
-			ss.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", x)))
-			//time.Sleep(time.Second * 1)
-			//}
-			if x == 210010 {
-				exit <- true
-			}
+	for x, ss := range cc {
 
+		//if ii%100 == 0 {
+		for i := 0; i < 200000; i++ {
+			go func(x int, cs *Client) {
+				cs.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", x)))
+			}(i, ss)
 		}
-	}()
+		//time.Sleep(time.Second * 1)
+		//}
+		if x == 210010 {
+			exit <- true
+		}
+
+	}
+
 	/*
 		mapc := make(map[int]*Client, 32000)
 		for i := 0; i < 32000; i++ {
