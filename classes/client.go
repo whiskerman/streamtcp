@@ -47,8 +47,8 @@ func CreateClient(conn net.Conn, callback CallBackCClient) *Client {
 
 	Client := &Client{
 		conn:       conn,
-		incoming:   make(Message, 102400),
-		outgoing:   make(Message, 102400),
+		incoming:   make(Message, 1024),
+		outgoing:   make(Message, 1024),
 		quiting:    make(chan net.Conn),
 		reader:     reader,
 		writer:     writer,
@@ -98,18 +98,18 @@ func (self *Client) Read() {
 			return
 		}
 		if n == 1 && string(buffer[:1]) == "P" {
-			/*
-				if _, err := self.writer.Write([]byte("P")); err != nil {
-					self.quit()
-					return
-				}
-				if err := self.writer.Flush(); err != nil {
-					log.Printf("Write error: %s\n", err)
-					self.quit()
-					return
-				}
-			*/
-			//log.Println(self.conn.RemoteAddr().String(), " recv : P ")
+
+			if _, err := self.writer.Write([]byte("P")); err != nil {
+				self.quit()
+				return
+			}
+			if err := self.writer.Flush(); err != nil {
+				log.Printf("Write error: %s\n", err)
+				self.quit()
+				return
+			}
+
+			log.Println(self.conn.RemoteAddr().String(), " recv and reply : P ")
 		}
 		if n > 0 {
 			//fmt.Println("n is ========================================", n)

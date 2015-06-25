@@ -20,6 +20,7 @@ type ClientTable map[net.Conn]*Session
 
 type Server struct {
 	locker     *sync.RWMutex
+	startwg    sync.WaitGroup
 	listener   net.Listener
 	sessions   ClientTable
 	tokens     Token
@@ -63,13 +64,13 @@ func (self *Server) listen() {
 				self.broadcast(message)
 				//}(message)
 			case conn := <-self.pending:
-				go func(con net.Conn) {
-					self.join(con)
-				}(conn)
+
+				go self.join(conn)
+
 			case conn := <-self.quiting:
-				go func(con net.Conn) {
-					self.leave(con)
-				}(conn)
+
+				go self.leave(conn)
+
 			}
 		}
 	}()
@@ -129,17 +130,18 @@ func (self *Server) leave(conn net.Conn) {
 	if conn != nil {
 		//close(self.sessions[conn].incoming)
 		//close(self.sessions[conn].outgoing)
+
 		conn.Close()
-		self.locker.Lock()
+		//defer self.locker.Unlock()
+		//self.locker.Lock()
 		client := self.sessions[conn]
-		if client {
+		if client != nil {
 			close(client.incoming)
 			close(client.outgoing)
 			close(client.quiting)
 		}
+		self.startwg.Done()
 		delete(self.sessions, conn)
-
-		self.locker.Unlock()
 
 	}
 
@@ -174,24 +176,28 @@ func (self *Server) Start(connString string) {
 	for i := 0; i < MAXCLIENTS; i++ {
 		self.generateToken()
 	}
-	//for j := 0; j < 10; j++ {
+	self.startwg.Add(1)
+	for j := 0; j < 10; j++ {
 
-	func(m int) {
-		for {
-			conn, err := self.listener.Accept()
+		go func(m int) {
+			for {
+				self.startwg.Add(1)
+				conn, err := self.listener.Accept()
 
-			if err != nil {
-				log.Println(err)
-				return
+				if err != nil {
+					log.Println(err)
+					return
+				}
+
+				log.Printf("A new connection %v kicks\n", conn)
+
+				self.takeToken()
+				self.pending <- conn
+
 			}
-
-			log.Printf("A new connection %v kicks\n", conn)
-
-			self.takeToken()
-			self.pending <- conn
-		}
-	}(1)
-	//}
+		}(j)
+	}
+	self.startwg.Wait()
 	//<-exit
 
 }

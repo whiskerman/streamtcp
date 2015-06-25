@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
 	//"time"
 )
 
@@ -15,7 +16,7 @@ type (
 )
 
 func startClient() (client *Client) {
-	conn, err := net.Dial("tcp", os.Args[1])
+	conn, err := net.Dial("tcp4", os.Args[1])
 
 	if err != nil {
 		log.Fatal(err)
@@ -29,6 +30,7 @@ func startClient() (client *Client) {
 func readclient(client *Client) {
 	for {
 		data := client.GetIncoming()
+		//_ = data
 		fmt.Println(client.GetConn().RemoteAddr().String(), ":", string(data))
 	}
 }
@@ -46,23 +48,27 @@ func main() {
 		fmt.Printf("Usage: %s <port>\n", os.Args[0])
 		os.Exit(-1)
 	}
-	exit := make(chan bool)
+	//exit := make(chan bool)
 	cc := startClients(40000)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	for j := 0; j < 40000; j++ {
+		wg.Add(1)
+	}
 
 	for x, ss := range cc {
-
-		//if ii%100 == 0 {
-		for i := 0; i < 200000; i++ {
-			go func(x int, cs *Client) {
-				cs.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", x)))
-			}(i, ss)
-		}
+		ss.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", x)))
+		/*
+			//if ii%100 == 0 {
+			for i := 0; i < 200000; i++ {
+				go func(x int, cs *Client) {
+					cs.PutOutgoing([]byte(fmt.Sprintf("hello, i am conncect :%d", x)))
+				}(i, ss)
+			}
+		*/
 		//time.Sleep(time.Second * 1)
 		//}
-		if x == 210010 {
-			exit <- true
-		}
-
+		wg.Done()
 	}
 
 	/*
@@ -101,7 +107,9 @@ func main() {
 				}
 	*/
 	//}
-	<-exit
+	wg.Wait()
+	//<-exit
+	fmt.Println("client did end")
 	//time.Sleep(time.Hour * 1)
 
 }
