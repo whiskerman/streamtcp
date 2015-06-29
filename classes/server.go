@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
+	//"sync"
 	//"strings"
 )
 
@@ -19,8 +19,6 @@ type Token chan int
 type ClientTable map[net.Conn]*Session
 
 type Server struct {
-	locker     *sync.RWMutex
-	startwg    sync.WaitGroup
 	listener   net.Listener
 	sessions   ClientTable
 	tokens     Token
@@ -47,7 +45,6 @@ func CreateServer(callbackServer CallBackServer) *Server {
 		quiting:    make(chan net.Conn, 1024000),
 		incoming:   make(Message, 1024000),
 		outgoing:   make(Message, 1024000),
-		locker:     new(sync.RWMutex),
 		messageRec: callbackServer,
 	}
 	//server.listeners = make([]net.Listener, 100)
@@ -65,11 +62,11 @@ func (self *Server) listen() {
 				//}(message)
 			case conn := <-self.pending:
 
-				go self.join(conn)
+				self.join(conn)
 
 			case conn := <-self.quiting:
 
-				go self.leave(conn)
+				self.leave(conn)
 
 			}
 		}
@@ -128,19 +125,15 @@ func (self *Server) join(conn net.Conn) {
 func (self *Server) leave(conn net.Conn) {
 
 	if conn != nil {
-		//close(self.sessions[conn].incoming)
-		//close(self.sessions[conn].outgoing)
 
 		conn.Close()
-		//defer self.locker.Unlock()
-		//self.locker.Lock()
 		client := self.sessions[conn]
 		if client != nil {
 			close(client.incoming)
 			close(client.outgoing)
 			close(client.quiting)
 		}
-		self.startwg.Done()
+
 		delete(self.sessions, conn)
 
 	}
@@ -176,28 +169,20 @@ func (self *Server) Start(connString string) {
 	for i := 0; i < MAXCLIENTS; i++ {
 		self.generateToken()
 	}
-	self.startwg.Add(1)
-	for j := 0; j < 10; j++ {
+	for {
+		conn, err := self.listener.Accept()
 
-		go func(m int) {
-			for {
-				self.startwg.Add(1)
-				conn, err := self.listener.Accept()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-				if err != nil {
-					log.Println(err)
-					return
-				}
+		log.Printf("A new connection %v kicks\n", conn)
 
-				log.Printf("A new connection %v kicks\n", conn)
+		self.takeToken()
+		self.pending <- conn
 
-				self.takeToken()
-				self.pending <- conn
-
-			}
-		}(j)
 	}
-	self.startwg.Wait()
 	//<-exit
 
 }
